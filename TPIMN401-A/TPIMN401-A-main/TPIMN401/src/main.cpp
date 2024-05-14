@@ -153,8 +153,7 @@ namespace IMN401 {
 			float angle = 2.0f * M_PI * i / n;
 			float x = radius * std::cos(angle);
 			float y = radius * std::sin(angle);
-			glm::vec3 vertex = { x, y, 0.f };
-			vertices.push_back(vertex);
+			vertices.push_back(glm::vec3{ x, y, 0.f });
 		}
 
 		// Generate indices for triangles (each triangle originates from the center)
@@ -179,16 +178,16 @@ namespace IMN401 {
 		glCreateBuffers(1, &EBO_indices);
 		glNamedBufferData(EBO_indices, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
 
-		// Bind the vertex buffer to VAO
-		glVertexArrayVertexBuffer(VAO, 0, VBO_vertices, 0, sizeof(glm::vec3));
-
 		//Atributes binding
 		glVertexArrayAttribBinding(VAO, 0, 0);
 		//Definir le formatage des VBOs
 		glVertexArrayAttribFormat(VAO, 0, 3, GL_FLOAT, GL_FALSE, 0);
 		//Activer chaque attribut de nos données
 		glEnableVertexArrayAttrib(VAO, 0);
-		//Specifier le VBO a lire
+
+		// Bind the vertex buffer to VAO
+		glVertexArrayVertexBuffer(VAO, 0, VBO_vertices, 0, sizeof(glm::vec3));
+		//Specifier le VBO a lire pour le tableau d'indices indices
 		glVertexArrayElementBuffer(VAO, EBO_indices);
 
 
