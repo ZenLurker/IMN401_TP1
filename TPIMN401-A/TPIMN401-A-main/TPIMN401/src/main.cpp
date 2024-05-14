@@ -8,7 +8,7 @@
 #include <vector>
 #include <glm.hpp>
 #include <gtc/constants.hpp>
-#include <chrono>
+//#include "time.h"
 #include "utils.hpp"
 
 namespace IMN401 {
@@ -142,7 +142,7 @@ namespace IMN401 {
 		std::vector<glm::vec3> vertices;
 		std::vector<GLuint> indices;
 
-		const int n = 20; // Number of vertices on the circle
+		const int n = 100; // Number of vertices on the circle
 		const float radius = 0.5f; // Radius of the circle
 
 		// Center vertex
@@ -202,6 +202,13 @@ namespace IMN401 {
 		// Define the format of the VBO data
 		glVertexArrayAttribFormat(VAO, vertexPositionLocation, 3, GL_FLOAT, GL_FALSE, 0);
 
+		//Init clock and locate uniform time variable
+		GLuint elapsedTimeMSLocation = glGetAttribLocation(shaderProgram, "elapsedTimeMS");
+		if (vertexPositionLocation == -1) {
+			std::cerr << "Failed to get location for elapsedTimeMS" << std::endl;
+		}
+		clock_t startTime;
+		startTime = clock();
 
 		if (glGetError() != GL_NO_ERROR) {
 			std::cerr << "OpenGL error" << std::endl;
@@ -217,6 +224,9 @@ namespace IMN401 {
 			// ==================
 			// TODO: render here !
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			GLfloat timeElapsedMS = (clock() - (GLfloat)startTime);
+			glProgramUniform1fv(shaderProgram, elapsedTimeMSLocation, 1, &timeElapsedMS);
 
 			glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 
