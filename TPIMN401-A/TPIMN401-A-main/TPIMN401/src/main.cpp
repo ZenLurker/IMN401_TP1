@@ -1,5 +1,9 @@
 #include <glad/glad.h>
 #include <glfw3.h>
+
+#define _USE_MATH_DEFINES
+#include "cmath" 
+
 #include <iostream>
 #include <vector>
 #include <glm.hpp>
@@ -123,57 +127,82 @@ namespace IMN401 {
 		// Check for shader program linking errors
 		printProgramError(shaderProgram);
 
+		// USE the program with the attached shaders
+		glUseProgram(shaderProgram);
+
 		// Cleanup shaders
 		glDeleteShader(vertexShader);
 		glDeleteShader(fragmentShader);
 
-		// Get the location of the uniform variable in the fragment shader
-		GLuint fragmentColorLocation = glGetUniformLocation(shaderProgram, "triangleColor");
-		if (fragmentColorLocation == -1) {
-			std::cerr << "Failed to get uniform location for triangleColor" << std::endl;
-		}
-
-		// Set the uniform color value
-		glUseProgram(shaderProgram);
-		GLfloat fragmentColor[] = { 1.0f, 0.0f, 0.0f }; // Red color
-		glUniform3fv(fragmentColorLocation, 1, fragmentColor);
-
 		glClearColor(0.3, 0.3, 0.3, 0);
 		glEnable(GL_DEPTH_TEST);
 
+		//---------------- TABLEAUX----------------
+		// Vertices for the circle
+		std::vector<glm::vec3> vertices;
+		std::vector<GLuint> indices;
 
-		glm::vec3 vArray[]
-		{ {-0.5f, -0.5f, 0.f},
-			{0, 0.5f, 0.f},
-			{0.5f, -0.5f, 0.f}
-		};
+		const int n = 20; // Number of vertices on the circle
+		const float radius = 0.5f; // Radius of the circle
 
-		//Creation de VBO
-		GLuint VBO;
-		glCreateBuffers(1, &VBO);
-		//Remplir le VBO
-		glNamedBufferData(VBO,
-			sizeof(GLfloat) * sizeof(vArray),
-			&vArray,
-			GL_STATIC_DRAW);
+		// Center vertex
+		vertices.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
 
-		//Creer VAO
-		GLuint VA;
-		glCreateVertexArrays(1, &VA);
+		// Generate vertices on the circle
+		for (int i = 0; i < n; ++i) {
+			float angle = 2.0f * M_PI * i / n;
+			float x = radius * std::cos(angle);
+			float y = radius * std::sin(angle);
+			glm::vec3 vertex = { x, y, 0.f };
+			vertices.push_back(vertex);
+		}
 
-		//Activer chaque attribut de nos données
-		glEnableVertexArrayAttrib(VA, 0);
-		glEnableVertexArrayAttrib(VA, 1); //removing this doesnt break anything??
+		// Generate indices for triangles (each triangle originates from the center)
+		for (int i = 0; i < n; ++i) {
+			indices.push_back(0); // Center vertex
+			indices.push_back(i + 1); // Current vertex on the circle
+			indices.push_back((i + 1) % n + 1); // Next vertex on the circle (wrapping around)
+		}
 
-		//Definir le formatage des VBOs
-		glVertexArrayAttribFormat(VA, 0, 3, GL_FLOAT, GL_FALSE, 0);
+		// Create and bind the VAO
+		GLuint VAO;
+		glCreateVertexArrays(1, &VAO);
+		glBindVertexArray(VAO);
 
-		//Specifier le VBO a lire
-		glVertexArrayVertexBuffer(VA, 0, VBO, 0, sizeof(float) * 3);
+		// Create and bind the vertex buffer for vertices
+		GLuint VBO_vertices;
+		glCreateBuffers(1, &VBO_vertices);
+		glNamedBufferData(VBO_vertices, vertices.size() * sizeof(glm::vec3), vertices.data(), GL_STATIC_DRAW);
+
+		// Create and bind the vertex buffer for the indices
+		GLuint EBO_indices;
+		glCreateBuffers(1, &EBO_indices);
+		glNamedBufferData(EBO_indices, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
+
+		// Bind the vertex buffer to VAO
+		glVertexArrayVertexBuffer(VAO, 0, VBO_vertices, 0, sizeof(glm::vec3));
 
 		//Atributes binding
-		glVertexArrayAttribBinding(VA, 0, 0);
-		glVertexArrayAttribBinding(VA, 1, 1);
+		glVertexArrayAttribBinding(VAO, 0, 0);
+		//Definir le formatage des VBOs
+		glVertexArrayAttribFormat(VAO, 0, 3, GL_FLOAT, GL_FALSE, 0);
+		//Activer chaque attribut de nos données
+		glEnableVertexArrayAttrib(VAO, 0);
+		//Specifier le VBO a lire
+		glVertexArrayElementBuffer(VAO, EBO_indices);
+
+
+		// Specify the input attribute for the vertex position in the vertex shader
+		GLuint vertexPositionLocation = glGetAttribLocation(shaderProgram, "vertexPosition");
+		if (vertexPositionLocation == -1) {
+			std::cerr << "Failed to get location for vertexPosition" << std::endl;
+		}
+		// Enable the attribute array
+		glEnableVertexAttribArray(vertexPositionLocation);
+
+		// Define the format of the VBO data
+		glVertexArrayAttribFormat(VAO, vertexPositionLocation, 3, GL_FLOAT, GL_FALSE, 0);
+
 
 		if (glGetError() != GL_NO_ERROR) {
 			std::cerr << "OpenGL error" << std::endl;
@@ -190,12 +219,9 @@ namespace IMN401 {
 			// TODO: render here !
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			//glBindProgramPipeline(pipeline);
-			glBindVertexArray(VA);
+			glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 
-			glDrawArrays(GL_TRIANGLES, 0, 3);
 			// ==================
-
 			glfwSwapBuffers(window);
 		}
 
