@@ -127,7 +127,6 @@ namespace IMN401 {
 		// Check for shader program linking errors
 		printProgramError(shaderProgram);
 
-		// USE the program with the attached shaders
 		glUseProgram(shaderProgram);
 
 		// Cleanup shaders
@@ -142,7 +141,7 @@ namespace IMN401 {
 		std::vector<glm::vec3> vertices;
 		std::vector<GLuint> indices;
 
-		const int n = 100; // Number of vertices on the circle
+		const int n = 10; // Number of vertices on the circle
 		const float radius = 0.5f; // Radius of the circle
 
 		// Center vertex
@@ -221,18 +220,27 @@ namespace IMN401 {
 		{
 			// Handle events
 			glfwPollEvents();
-			// ==================
-			// TODO: render here !
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+			// Calculate time elapsed since start
 			GLfloat timeElapsedMS = (clock() - (GLfloat)startTime);
-			glProgramUniform1fv(shaderProgram, elapsedTimeMSLocation, 1, &timeElapsedMS);
+			glGetError();
 
+			// Set uniform value for elapsedTimeMS
+			glUniform1f(elapsedTimeMSLocation, 0);
+			glGetError();
+
+			// Clear the screen
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			glGetError();
+
+			// Draw elements
 			glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+			glGetError();
 
-			// ==================
+			// Swap buffers
 			glfwSwapBuffers(window);
 		}
+
 
 		// Clean up
 		glfwTerminate();

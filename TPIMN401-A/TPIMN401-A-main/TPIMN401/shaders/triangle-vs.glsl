@@ -7,10 +7,15 @@ layout(location = 0) in vec3 vertexPosition;
 out vec2 fragPos; 
 
 void main() {
-    vec3 dynamicVertexPosition = vertexPosition;
-    dynamicVertexPosition.x *= cos(elapsedTimeMS);
-    dynamicVertexPosition.y *= cos(elapsedTimeMS);
+    // Calculate the scaling factor based on the cosine of elapsedTimeMS
+    float scaleFactor = cos(elapsedTimeMS); // Adjust speed as needed
 
-    gl_Position = vec4(dynamicVertexPosition, 1.0); 
-    fragPos = dynamicVertexPosition.xy; 
+    // Scale the vertex position by the scaleFactor
+    vec3 scaledVertexPosition = vertexPosition * scaleFactor;
+
+    // Set the position of the vertex
+    gl_Position = vec4(scaledVertexPosition, 1.0); 
+    
+    // Pass the scaled position to the fragment shader
+    fragPos = scaledVertexPosition.xy; 
 }
