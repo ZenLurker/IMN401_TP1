@@ -1,14 +1,14 @@
 #version 460
 
-uniform float elapsedTimeMS;
+uniform float elapsedTime;
 
 layout(location = 0) in vec3 vertexPosition; 
 
 out vec2 fragPos; 
 
 void main() {
-    // Calculate the scaling factor based on the cosine of elapsedTimeMS
-    float scaleFactor = cos(elapsedTimeMS); // Adjust speed as needed
+    // Calculate the scaling factor based on the cosine of elapsedTime
+    float scaleFactor = cos(elapsedTime); // Adjust speed as needed
 
     // Scale the vertex position by the scaleFactor
     vec3 scaledVertexPosition = vertexPosition * scaleFactor;

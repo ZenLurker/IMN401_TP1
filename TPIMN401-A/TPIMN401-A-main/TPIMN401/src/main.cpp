@@ -8,7 +8,6 @@
 #include <vector>
 #include <glm.hpp>
 #include <gtc/constants.hpp>
-//#include "time.h"
 #include "utils.hpp"
 
 namespace IMN401 {
@@ -110,7 +109,7 @@ namespace IMN401 {
 		std::string strFS = readFile("shaders/triangle-fs.glsl");
 		const GLchar* fsCode = strFS.c_str();
 
-		// Create shader program
+		// Create and compile shaders
 		GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
 		glShaderSource(vertexShader, 1, &vsCode, nullptr);
 		glCompileShader(vertexShader);
@@ -119,6 +118,7 @@ namespace IMN401 {
 		glShaderSource(fragmentShader, 1, &fsCode, nullptr);
 		glCompileShader(fragmentShader);
 
+		// Create program
 		GLuint shaderProgram = glCreateProgram();
 		glAttachShader(shaderProgram, vertexShader);
 		glAttachShader(shaderProgram, fragmentShader);
@@ -141,22 +141,22 @@ namespace IMN401 {
 		std::vector<glm::vec3> vertices;
 		std::vector<GLuint> indices;
 
-		const int n = 10; // Number of vertices on the circle
-		const float radius = 0.5f; // Radius of the circle
+		const GLuint n = 100; // Number of vertices on the circle
+		const GLfloat radius = 0.5f; // Radius of the circle
 
 		// Center vertex
 		vertices.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
 
 		// Generate vertices on the circle
-		for (int i = 0; i < n; ++i) {
-			float angle = 2.0f * M_PI * i / n;
-			float x = radius * std::cos(angle);
-			float y = radius * std::sin(angle);
+		for (GLuint i = 0; i < n; ++i) {
+			GLfloat angle = 2.0f * M_PI * i / n;
+			GLfloat x = radius * std::cos(angle);
+			GLfloat y = radius * std::sin(angle);
 			vertices.push_back(glm::vec3{ x, y, 0.f });
 		}
 
 		// Generate indices for triangles (each triangle originates from the center)
-		for (int i = 0; i < n; ++i) {
+		for (GLuint i = 0; i < n; ++i) {
 			indices.push_back(0); // Center vertex
 			indices.push_back(i + 1); // Current vertex on the circle
 			indices.push_back((i + 1) % n + 1); // Next vertex on the circle (wrapping around)
@@ -191,7 +191,7 @@ namespace IMN401 {
 
 
 		// Specify the input attribute for the vertex position in the vertex shader
-		GLuint vertexPositionLocation = glGetAttribLocation(shaderProgram, "vertexPosition");
+		GLint vertexPositionLocation = glGetAttribLocation(shaderProgram, "vertexPosition");
 		if (vertexPositionLocation == -1) {
 			std::cerr << "Failed to get location for vertexPosition" << std::endl;
 		}
@@ -202,8 +202,8 @@ namespace IMN401 {
 		glVertexArrayAttribFormat(VAO, vertexPositionLocation, 3, GL_FLOAT, GL_FALSE, 0);
 
 		//Init clock and locate uniform time variable
-		GLuint elapsedTimeMSLocation = glGetAttribLocation(shaderProgram, "elapsedTimeMS");
-		if (vertexPositionLocation == -1) {
+		GLint elapsedTimeLocation = glGetUniformLocation(shaderProgram, "elapsedTime");
+		if (elapsedTimeLocation == -1) {
 			std::cerr << "Failed to get location for elapsedTimeMS" << std::endl;
 		}
 		clock_t startTime;
@@ -221,26 +221,21 @@ namespace IMN401 {
 			// Handle events
 			glfwPollEvents();
 
-			// Calculate time elapsed since start
-			GLfloat timeElapsedMS = (clock() - (GLfloat)startTime);
-			glGetError();
-
-			// Set uniform value for elapsedTimeMS
-			glUniform1f(elapsedTimeMSLocation, 0);
-			glGetError();
-
 			// Clear the screen
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			glGetError();
+
+			// Calculate time elapsed since start
+			GLfloat timeElapsed = ((clock() - (GLfloat)startTime)) / CLOCKS_PER_SEC;
+
+			// Set uniform value for elapsedTimeMS
+			glProgramUniform1f(shaderProgram, elapsedTimeLocation, timeElapsed);
 
 			// Draw elements
 			glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-			glGetError();
 
 			// Swap buffers
 			glfwSwapBuffers(window);
 		}
-
 
 		// Clean up
 		glfwTerminate();
