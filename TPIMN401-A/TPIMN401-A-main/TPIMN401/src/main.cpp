@@ -54,7 +54,7 @@ namespace IMN401 {
 			std::cout << "Pipeline : OK" << std::endl;
 	}
 
-	//Force dGPU usage on my AMD hybrid setup
+	// Force dGPU usage on my AMD hybrid setup
 #ifdef _WIN32
 #ifdef __cplusplus
 	extern "C" {
@@ -103,7 +103,7 @@ namespace IMN401 {
 		// TODO: init buffers, shaders, etc.
 		// cf. https://www.khronos.org/files/opengl46-quick-reference-card.pdf
 
-		// shaders
+		// Shaders
 		std::string strVS = readFile("shaders/triangle-vs.glsl");
 		const GLchar* vsCode = strVS.c_str();
 		std::string strFS = readFile("shaders/triangle-fs.glsl");
@@ -133,7 +133,7 @@ namespace IMN401 {
 		glDeleteShader(vertexShader);
 		glDeleteShader(fragmentShader);
 
-		glClearColor(0.3, 0.3, 0.3, 0);
+		glClearColor(0.8f, 0.8f, 0.8f, 1);
 		glEnable(GL_DEPTH_TEST);
 
 		//---------------- TABLEAUX----------------
@@ -177,16 +177,16 @@ namespace IMN401 {
 		glCreateBuffers(1, &EBO_indices);
 		glNamedBufferData(EBO_indices, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
 
-		//Atributes binding
+		// Atributes binding
 		glVertexArrayAttribBinding(VAO, 0, 0);
-		//Definir le formatage des VBOs
+		// Definir le formatage des VBOs
 		glVertexArrayAttribFormat(VAO, 0, 3, GL_FLOAT, GL_FALSE, 0);
 		//Activer chaque attribut de nos données
 		glEnableVertexArrayAttrib(VAO, 0);
 
 		// Bind the vertex buffer to VAO
 		glVertexArrayVertexBuffer(VAO, 0, VBO_vertices, 0, sizeof(glm::vec3));
-		//Specifier le VBO a lire pour le tableau d'indices indices
+		// Specifier le VBO a lire pour le tableau d'indices indices
 		glVertexArrayElementBuffer(VAO, EBO_indices);
 
 

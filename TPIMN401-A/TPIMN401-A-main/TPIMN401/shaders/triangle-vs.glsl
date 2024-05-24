@@ -8,7 +8,7 @@ out vec2 fragPos;
 
 void main() {
     // Calculate the scaling factor based on the cosine of elapsedTime
-    float scaleFactor = cos(elapsedTime); // Adjust speed as needed
+    float scaleFactor = cos(elapsedTime); 
 
     // Scale the vertex position by the scaleFactor
     vec3 scaledVertexPosition = vertexPosition * scaleFactor;
